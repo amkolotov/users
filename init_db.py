@@ -3,8 +3,8 @@ from datetime import datetime
 from passlib.handlers.sha2_crypt import sha256_crypt
 from sqlalchemy import MetaData, create_engine
 
-from my_app.settings import config
-from my_app.db import users, permissions, PermEnum
+from settings import config
+from db import users, permissions, PermEnum
 
 
 DSN = "postgresql://{user}:{password}@{host}:{port}/{database}"
