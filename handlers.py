@@ -18,6 +18,7 @@ from schemas import User, Login
 
 
 async def get_data(request):
+    """Метод для получения данных из request"""
     data = await request.post()
     if not len(data):
         data = await request.text()
@@ -34,6 +35,7 @@ class Web(object):
           summary='Список пользователей',
           description='Получение списка пользователей, доступно любому пользователю')
     async def index(self, request):
+
         users = []
         async with request.app.db_engine.acquire() as conn:
             cursor = await conn.execute(db.users.select())
@@ -54,7 +56,7 @@ class Web(object):
           summary='Информация о пользователе',
           description='Получение детальной информации о пользователе, доступно только администратору')
     async def detail(self, request):
-
+        """Обработчик для получения детальной информации о пользователе"""
         await check_permission(request, 'admin')
 
         user_id = request.match_info.get('user_id')
@@ -67,12 +69,14 @@ class Web(object):
                     response = dict(user)
                     try:
                         response['birthday'] = datetime.strftime(response['birthday'], '%d-%m-%Y')
+                        status = 200
                     except:
                         pass
                 except Exception as e:
                     response = {'error': str(e)}
+                    status = 400
 
-                return web.json_response(response)
+                return web.json_response(response, status=status)
 
     @docs(tags=['create'],
           summary='Создание нового пользователя',
@@ -90,11 +94,13 @@ class Web(object):
                 async with request.app.db_engine.acquire() as conn:
                     try:
                         cursor = await conn.execute(db.users.insert().values(**data))
-                        response = {'success': 200}
+                        response = {'message': 'success'}
+                        status = 201
                     except Exception as e:
                         response = {'error': str(e)}
+                        status = 400
 
-                    return web.json_response(response)
+                    return web.json_response(response, status=status)
 
     @docs(tags=['edit'],
           summary='Редактирование пользователя',
@@ -111,11 +117,13 @@ class Web(object):
             async with request.app.db_engine.acquire() as conn:
                 try:
                     await conn.execute(db.users.update().where(db.users.c.id == user_id).values(**data))
-                    response = {'success': 200}
+                    response = {'message': 'success'}
+                    status = 201
                 except Exception as e:
                     response = {'error': str(e)}
+                    status = 400
 
-                return web.json_response(response)
+                return web.json_response(response, status=status)
 
     @docs(tags=['delete'],
           summary='Удаление пользователей',
@@ -129,11 +137,13 @@ class Web(object):
             async with request.app.db_engine.acquire() as conn:
                 try:
                     await conn.execute(db.users.delete().where(db.users.c.id == user_id))
-                    response = {'success': 200}
+                    response = {'message': 'success'}
+                    status = 201
                 except Exception as e:
                     response = {'error': str(e)}
+                    status = 400
 
-                return web.json_response(response)
+                return web.json_response(response, status=status)
 
     @docs(tags=['hoami'],
           summary='Проверка авторизации пользователя',
@@ -142,10 +152,12 @@ class Web(object):
         username = await authorized_userid(request)
         if username:
             message = f'Hello, {username}!'
+            status = 200
         else:
             message = 'You need to login'
+            status = 401
 
-        return web.json_response({'message': message})
+        return web.json_response({'message': message}, status=status)
 
     @docs(tags=['login'],
           summary='Аутентификация пользователя',

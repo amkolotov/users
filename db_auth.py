@@ -13,6 +13,7 @@ class DBAuthorizationPolicy(AbstractAuthorizationPolicy):
         self.dbengine = dbengine
 
     async def authorized_userid(self, identity):
+        """Проверка авторизации пользователя"""
         async with self.dbengine.acquire() as conn:
             where = sa.and_(db.users.c.login == identity,
                             sa.not_(db.users.c.disabled))
@@ -24,7 +25,7 @@ class DBAuthorizationPolicy(AbstractAuthorizationPolicy):
                 return None
 
     async def permits(self, identity, permission, context=None):
-
+        """Проверка наличия права у пользователя"""
         if identity is None:
             return False
 
@@ -48,6 +49,7 @@ class DBAuthorizationPolicy(AbstractAuthorizationPolicy):
 
 
 async def check_credentials(db_engine, username, password):
+    """Проверка правильности пароля"""
     async with db_engine.acquire() as conn:
         where = sa.and_(db.users.c.login == username,
                         sa.not_(db.users.c.disabled))
