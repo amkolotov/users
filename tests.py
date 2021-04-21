@@ -20,7 +20,7 @@ def cli(loop, aiohttp_client):
 async def test_post(cli):
     resp = await cli.post('/', data={'value': 'post data'})
     assert resp.status == 200
-    assert await resp.text() == '{"message": "post data"}'
+    assert await resp.json() == {"message": "post data"}
     assert cli.server.app['value'] == 'post data'
 
 
@@ -28,6 +28,6 @@ async def test_get(cli):
     cli.server.app['value'] = 'index'
     resp = await cli.get('/')
     assert resp.status == 200
-    assert await resp.text() == '{"value": "index"}'
+    assert await resp.json() == {"value": "index"}
 
 

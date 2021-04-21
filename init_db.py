@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from passlib.handlers.sha2_crypt import sha256_crypt
@@ -47,7 +48,15 @@ def sample_data(engine):
 
 
 if __name__ == '__main__':
-    db_url = DSN.format(**config['postgres'])
+    db_url = DSN.format(
+        database=config['postgres']['database'],
+        user=config['postgres']['user'],
+        password=config['postgres']['password'],
+        host=os.environ.get('POSTGRES_HOST', config['postgres']['host']),
+        port=config['postgres']['port'],
+        minsize=config['postgres']['minsize'],
+        maxsize=config['postgres']['maxsize']
+    )
     engine = create_engine(db_url)
 
     create_tables(engine)

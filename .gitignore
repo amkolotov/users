@@ -1,6 +1,7 @@
 !*media/.gitkeep
 media/*
 .idea/
+data/
 
 # Environments
 .env
