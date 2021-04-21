@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTOCODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update -y
+RUN apt-get update -y && apt-get install netcat -y
 RUN apt-get upgrade -y
 RUN pip install --upgrade pip
 
@@ -14,4 +14,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ['python3', 'main.py']
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

@@ -1,8 +1,13 @@
 import enum
+import os
 
 import aiopg.sa
 from sqlalchemy import MetaData, Table, Column, Integer, String, Boolean, ForeignKey, Date
 from sqlalchemy_utils import ChoiceType
+
+from aiohttp_security import setup as setup_security, CookiesIdentityPolicy
+
+from db_auth import DBAuthorizationPolicy
 
 TYPES = [
     ('admin', 'Admin'),
@@ -46,17 +51,21 @@ async def init_pg(app):
         database=conf['database'],
         user=conf['user'],
         password=conf['password'],
-        host=conf['host'],
+        host=os.environ.get('POSTGRES_HOST', conf['host']),
         port=conf['port'],
         minsize=conf['minsize'],
         maxsize=conf['maxsize'],
     )
-    app['db'] = engine
+    app.db_engine = engine
+    setup_security(app,
+                   CookiesIdentityPolicy(),
+                   DBAuthorizationPolicy(engine))
+    return engine
 
 
 async def close_pg(app):
-    app['db'].close()
-    await app['db'].wait_closed()
+    app.db_engine.close()
+    await app.db_engine.wait_closed()
 
 
 

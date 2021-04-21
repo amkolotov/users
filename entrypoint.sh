@@ -1,18 +1,14 @@
 #!/bin/sh
 
-set -e
+echo "Waiting for postgres..."
 
-host="localhost"
-port="6379"
-cmd="$@"
-
->&2 echo "!!!!!!!! Check port for available !!!!!!!!"
-
-until curl http://"$host":"$port"; do
-  >&2 echo "Port is unavailable - sleeping"
+while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
   sleep 1
 done
 
->&2 echo "Port is up - executing command"
+echo "PostgreSQL started"
 
-exec $cmd
+python init_db.py
+python main.py
+
+exec "$@"
